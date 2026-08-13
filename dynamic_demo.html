@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Responsive Grid Demo</title>
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom configuration for Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4f46e5', // Indigo 600
+                        secondary: '#ec4899', // Pink 500
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body
+    class="bg-gray-50 min-h-screen font-sans text-gray-800 antialiased selection:bg-primary selection:text-white flex flex-col">
+
+    <!-- Header Section -->
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <h1
+                class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
+                Dynamic Data Loader
+            </h1>
+            <p class="mt-2 text-sm text-gray-500">A responsive single-page application using Tailwind CSS & Fetch API.
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+
+        <!-- Controls -->
+        <div
+            class="flex flex-col sm:flex-row justify-between items-center mb-10 gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div>
+                <h2 class="text-xl font-bold text-gray-800">Content Grid</h2>
+                <p class="text-gray-500 text-sm mt-1">Click the button to load fresh data dynamically.</p>
+            </div>
+
+            <button id="loadBtn"
+                class="w-full sm:w-auto px-6 py-3 bg-primary hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-200 active:scale-95 flex items-center justify-center gap-2">
+                <svg id="loadingSpinner" class="animate-spin h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg"
+                    fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+                <span id="btnText">Load Data</span>
+            </button>
+        </div>
+
+        <!-- 
+            Responsive Grid Container:
+            - grid-cols-1: 1 column on mobile (default)
+            - md:grid-cols-2: 2 columns on tablet (min-width: 768px)
+            - lg:grid-cols-3: 3 columns on desktop (min-width: 1024px)
+        -->
+        <div id="dataContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Initial Empty State -->
+            <div id="emptyState"
+                class="col-span-full text-center py-20 bg-gray-100/50 rounded-2xl border-2 border-dashed border-gray-200">
+                <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                    </path>
+                </svg>
+                <h3 class="text-lg font-medium text-gray-900">No data loaded</h3>
+                <p class="mt-1 text-gray-500">Click the "Load Data" button to fetch items.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-8 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-gray-500 text-sm">
+            &copy; 2026 Single File Demo. Built with HTML5, Tailwind, and Vanilla JS.
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loadBtn = document.getElementById('loadBtn');
+            const dataContainer = document.getElementById('dataContainer');
+            const emptyState = document.getElementById('emptyState');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const btnText = document.getElementById('btnText');
+
+            // Mock Data array to simulate a JSON API response
+            const mockData = [
+                { id: 1, title: 'Responsive Design', desc: 'Fluid grids, flexible images, and media queries ensure your site looks great on any screen size.' },
+                { id: 2, title: 'Tailwind CSS', desc: 'A utility-first CSS framework packed with classes like flex, pt-4, text-center and rotate-90 that can be composed to build any design.' },
+                { id: 3, title: 'Vanilla JavaScript', desc: 'Fast, lightweight DOM manipulation and API fetching without the overhead of heavy frameworks.' },
+                { id: 4, title: 'Fetch API', desc: 'The modern interface for fetching resources (including across the network). It provides a more powerful and flexible feature set than XMLHttpRequest.' },
+                { id: 5, title: 'Mobile First', desc: 'Designing for smaller screens first ensures core content is prioritized, scaling up gracefully for larger displays.' },
+                { id: 6, title: 'Clean Architecture', desc: 'Keeping code modular, commented, and well-structured makes it maintainable and beginner-friendly.' }
+            ];
+
+            // Add event listener to the load button
+            loadBtn.addEventListener('click', loadDataDynamically);
+
+            async function loadDataDynamically() {
+                // UI Loading State
+                setLoadingState(true);
+
+                try {
+                    // Simulate a network delay to demonstrate the async fetch capability
+                    await new Promise(resolve => setTimeout(resolve, 800));
+
+                    // In a real application, you would use fetch() here:
+                    // const response = await fetch('https://api.example.com/data');
+                    // const data = await response.json();
+
+                    // For this demo, we use our mockData array
+                    const data = mockData;
+
+                    // Clear out the container (removes empty state or previous cards)
+                    dataContainer.innerHTML = '';
+
+                    // Loop through data and create cards dynamically
+                    data.forEach((item, index) => {
+                        // Create card element
+                        const card = document.createElement('div');
+
+                        // Add Tailwind classes for styling, layout, and hover effects
+                        // Note the transition and transform utilities for smooth hover animations
+                        card.className = `
+                            bg-white p-6 rounded-2xl shadow-sm border border-gray-100 
+                            transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-primary/20
+                            flex flex-col h-full group opacity-0 translate-y-4
+                        `;
+
+                        // Inner HTML of the card
+                        card.innerHTML = `
+                            <div class="h-12 w-12 rounded-xl bg-indigo-50 flex items-center justify-center text-primary font-bold text-xl mb-4 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+                                0${item.id}
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary transition-colors duration-300">
+                                ${item.title}
+                            </h3>
+                            <p class="text-gray-600 leading-relaxed flex-grow">
+                                ${item.desc}
+                            </p>
+                        `;
+
+                        // Append card to container
+                        dataContainer.appendChild(card);
+
+                        // Staggered entry animation using setTimeout based on index
+                        setTimeout(() => {
+                            card.classList.remove('opacity-0', 'translate-y-4');
+                        }, 50 * index);
+                    });
+
+                } catch (error) {
+                    console.error("Failed to load data:", error);
+                    dataContainer.innerHTML = `<div class="col-span-full text-center text-red-500 py-10">Error loading data.</div>`;
+                } finally {
+                    // Reset UI State
+                    setLoadingState(false);
+                }
+            }
+
+            // Helper function to manage button loading state
+            function setLoadingState(isLoading) {
+                if (isLoading) {
+                    loadBtn.disabled = true;
+                    loadBtn.classList.add('cursor-not-allowed', 'opacity-80');
+                    loadingSpinner.classList.remove('hidden');
+                    btnText.textContent = 'Loading...';
+                } else {
+                    loadBtn.disabled = false;
+                    loadBtn.classList.remove('cursor-not-allowed', 'opacity-80');
+                    loadingSpinner.classList.add('hidden');
+                    btnText.textContent = 'Load Data';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
